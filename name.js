@@ -1,4 +1,3 @@
-/* name.js ── Puppeteer 版（fix selector = .leftBigBlock） */
 const express   = require('express');
 const puppeteer = require('puppeteer');
 const app = express();
@@ -18,8 +17,8 @@ app.post('/name-check', async (req, res) => {
 
   try {
     const browser = await puppeteer.launch({
-      headless:false, defaultViewport:null,
-      args:['--no-sandbox','--disable-setuid-sandbox','--start-maximized']
+      headless: 'new', // 雲端建議使用新版 Headless
+      args:['--no-sandbox','--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
     await page.goto('https://naming123.doitwell.tw/', { waitUntil:'domcontentloaded' });
@@ -43,7 +42,7 @@ app.post('/name-check', async (req, res) => {
       page.waitForNavigation({ waitUntil:'domcontentloaded', timeout:60000 })
     ]);
 
-    /* 等結果區塊出現（.leftBigBlock 最外層） */
+    /* 等結果區塊出現 */
     await page.waitForSelector('.leftBigBlock', { timeout:60000 });
 
     /* 擷取資料 */
@@ -67,6 +66,8 @@ app.post('/name-check', async (req, res) => {
   }
 });
 
-app.listen(3000,'0.0.0.0',() =>
-  console.log('✅ API：http://192.168.0.235:3000/name-check')
+/* ✅ 改這裡：使用 Zeabur 提供的 PORT */
+const port = process.env.PORT || 3000;
+app.listen(port, '0.0.0.0', () =>
+  console.log(`✅ API 啟動於 Port ${port}`)
 );
