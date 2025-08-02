@@ -1,0 +1,16 @@
+{
+  "name": "name-checker",
+  "version": "1.0.0",
+  "description": "Chinese name numerology API (Express + Puppeteer)",
+  "main": "name.js",              // 不一定用得到，但寫明無妨
+  "scripts": {
+    "start": "node name.js"       // <-- Zeabur 會執行這行
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.1.0",          // 必要：啟動 HTTP 3000
+    "puppeteer": "^24.10.2"
+  }
+}
