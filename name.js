@@ -67,7 +67,8 @@ app.post('/name-check', async (req, res) => {
 });
 
 /* ✅ 改這裡：使用 Zeabur 提供的 PORT */
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 app.listen(port, '0.0.0.0', () =>
   console.log(`✅ API 啟動於 Port ${port}`)
 );
+
