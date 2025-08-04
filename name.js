@@ -48,17 +48,20 @@ app.post('/name-check', async (req, res) => {
 
     /* 擷取資料 */
     const result = await page.evaluate(() => {
-      // 擷取五格簡化版
-      const forfiveDivs = document.querySelectorAll('.forfive');
-      const simplified = [...forfiveDivs].map(div => {
-        const raw = div.innerText.replace(/\s+/g, ' ').trim();
-        const match = raw.match(/^(.*?格：\s*\d+).*?([木火土金水])/);
-        return match ? `${match[1]} ${match[2]}` : raw;
-      }).join('\n');
-
-      // 取得完整姓名
+      // 1️⃣ 取得完整姓名
       const nameEls = document.querySelectorAll('.name, .span3 > div:not(.name)');
       const fullNameFromPage = [...nameEls].map(el => el.innerText.trim()[0]).join('');
+
+      // 2️⃣ 擷取五格簡化版（去掉吉凶）
+      const forfiveDivs = document.querySelectorAll('.forfive');
+      const simplified = [...forfiveDivs].map(div => {
+        let raw = div.innerText.replace(/\s+/g, ' ').trim(); // 標準化空白
+        // 去掉最後的「吉/凶」等字
+        raw = raw.replace(/\s+[吉凶]$/, '');
+        // 格式：總格：33 火
+        const match = raw.match(/^(.*?格：\s*\d+)\s*([木火土金水])?/);
+        return match ? `${match[1]} ${match[2] || ''}`.trim() : raw;
+      }).join('\n');
 
       return `${fullNameFromPage}\n${simplified}`;
     });
