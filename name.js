@@ -17,7 +17,7 @@ app.post('/name-check', async (req, res) => {
 
   try {
     const browser = await puppeteer.launch({
-      headless: 'new', 
+      headless: 'new',
       args:['--no-sandbox','--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
@@ -45,21 +45,24 @@ app.post('/name-check', async (req, res) => {
     /* 等結果區塊出現 */
     await page.waitForSelector('.leftBigBlock', { timeout:60000 });
 
-    /* 擷取資料 */
+    /* 擷取姓名 + 五格簡化版 */
     const result = await page.evaluate(() => {
-      // 姓名欄位包含 <div class="name"> 和後面的發字 <div>
-      const nameDivs = document.querySelectorAll('.leftBigBlock .name, .leftBigBlock .span3 > div:not(.name)');
-      const names = [...nameDivs].map(div => div.innerText.trim()).filter(Boolean);
+      // 取五格簡化版
+      const forfiveDivs = document.querySelectorAll('.forfive');
+      const simplified = [...forfiveDivs].map(div => {
+        const parts = div.innerText
+          .replace(/\s+/g, ' ')  // 合併多餘空白
+          .trim()
+          .split(' ');
+        // 預期 ["總格：３３", "火", "吉"] → "總格：３３ 火"
+        return parts.slice(0, 2).join(' ');
+      }).join('\n');
 
-      // 五格與命運
-      const forfive = [...document.querySelectorAll('.forfive')].map(el => el.innerText.trim()).filter(Boolean);
-      const fates   = [...document.querySelectorAll('.fate')].map(el => el.innerText.trim()).filter(Boolean);
+      // 取完整姓名（去掉換行和多餘空白）
+      const nameEls = document.querySelectorAll('.name, .span3 > div:not(.name)');
+      const fullNameFromPage = [...nameEls].map(el => el.innerText.trim()[0]).join('');
 
-      // 合併姓名與五格命運
-      const nameBlock = names.join('\n');
-      const forfiveBlock = forfive.map((v,i) => `${v}\n${fates[i] || ''}`).join('\n');
-
-      return `${nameBlock}\n${forfiveBlock}`;
+      return `${fullNameFromPage}\n${simplified}`;
     });
 
     await browser.close();
