@@ -17,7 +17,7 @@ app.post('/name-check', async (req, res) => {
 
   try {
     const browser = await puppeteer.launch({
-      headless: 'new', // 雲端建議用新版 headless
+      headless: 'new',
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
@@ -51,15 +51,12 @@ app.post('/name-check', async (req, res) => {
       // 擷取五格簡化版
       const forfiveDivs = document.querySelectorAll('.forfive');
       const simplified = [...forfiveDivs].map(div => {
-        const parts = div.innerText
-          .replace(/\s+/g, ' ')  // 合併多餘空白
-          .trim()
-          .split(' ');
-        // 取前兩段：例「外格：9 水」，忽略最後的吉凶
-        return parts.slice(0, 2).join(' ');
+        const raw = div.innerText.replace(/\s+/g, ' ').trim();
+        const match = raw.match(/^(.*?格：\s*\d+).*?([木火土金水])/);
+        return match ? `${match[1]} ${match[2]}` : raw;
       }).join('\n');
 
-      // 取得完整姓名（用原頁面字串拼接）
+      // 取得完整姓名
       const nameEls = document.querySelectorAll('.name, .span3 > div:not(.name)');
       const fullNameFromPage = [...nameEls].map(el => el.innerText.trim()[0]).join('');
 
@@ -75,7 +72,7 @@ app.post('/name-check', async (req, res) => {
   }
 });
 
-/* ✅ Zeabur 適用，使用 PORT 環境變數 */
+/* ✅ Zeabur 適用 */
 const port = process.env.PORT || 8080;
 app.listen(port, '0.0.0.0', () =>
   console.log(`✅ API 啟動於 Port ${port}`)
